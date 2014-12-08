@@ -1,26 +1,37 @@
 /**
- * Taken from http://paste.laravel.com/b8n
- * and added a datum attr to submit data along with the RESTful request
- * 
- * Restfulize any hiperlink that contains a data-method attribute by
- * creating a mini form with the specified method and adding a trigger
- * within the link.
- * Requires jQuery!
+ * JQuery plugin version of https://github.com/fahrulazmi/restfulizer.js
  *
- * Ex in Laravel:
- *     <a href="users" data-method="delete" data-datum="2">destroy</a>
- *     // Will trigger the route Route::delete('users')
- * 
+ * Convert elements in restful triggers.
+ *
+ * Example:
+ *     <a href="/destroy" class="destroy-item">destroy</a>
+ *
+ *      <script type="text/javascript">
+ *          $('.destroy-item').restfulize({
+ *              method: 'DELETE',
+ *              confirm: function() {
+ *                  return confirm('Are you sure you want to delete this item?');
+ *              }
+ *          });
+ *      </script>
+ *
  */
-$(function(){
-    $('[data-method]:not(:has(form))').append(function(){
-        return "\n"+
-        "<form action='"+$(this).attr('href')+"' method='POST' style='display:none'>\n"+
-        "   <input type='hidden' name='_method' value='"+$(this).attr('data-method')+"'>\n"+
-        "   <input type='hidden' name='datum' class='datum' value='"+$(this).attr('data-datum')+"'>\n"+
-        "</form>\n"
-    })
-    .removeAttr('href')
-    .attr('style','cursor:pointer;')
-    .attr('onclick','$(this).find("form").submit();');
-});
+(function($){
+    $.fn.restfulize = function (options) {
+        var defaults = {
+            confirm: function() { return true; },
+            method: 'POST'
+        };
+        var options = $.extend(defaults, options);
+        return this.each(function(){
+            var $link = $(this);
+            $link.append(
+                "<form action='"+$link.attr('href')+"' method='POST' style='display:none'>"+
+                    "<input type='hidden' name='_method' value='"+options.method+"'>"+
+                "</form>")
+            .removeAttr('href')
+            .attr('style','cursor:pointer;')
+            .bind('click', function() {if(options.confirm())$(this).find("form").submit();});
+        });
+    };
+})(jQuery);
