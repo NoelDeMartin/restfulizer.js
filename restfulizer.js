@@ -20,18 +20,21 @@
     $.fn.restfulize = function (options) {
         var defaults = {
             confirm: function() { return true; },
+            data: {},
             method: 'POST'
         };
         var options = $.extend(defaults, options);
         return this.each(function(){
             var $link = $(this);
-            $link.append(
-                "<form action='"+$link.attr('href')+"' method='POST' style='display:none'>"+
-                    "<input type='hidden' name='_method' value='"+options.method+"'>"+
-                "</form>")
-            .removeAttr('href')
-            .attr('style','cursor:pointer;')
-            .bind('click', function() {if(options.confirm())$(this).find("form").submit();});
+            var form = "<form action='" + $link.attr('href') + "' method='POST' style='display:none'>"+
+                    "<input type='hidden' name='_method' value='" + options.method + "'>";
+            for (data_key in options.data) {
+                form += "<input type='hidden' name='" + data_key + "' value='" + options.data[data_key] + "'>";
+            }
+            $link.append( form + "</form>")
+                .removeAttr('href')
+                .attr('style','cursor:pointer;')
+                .bind('click', function() {if(options.confirm())$(this).find("form").submit();});
         });
     };
 })(jQuery);
